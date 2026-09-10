@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Snitch AI - Voice Fraud Detection</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap");
+      :root {
+        --bg: #090a09;
+        --panel: #0e100e;
+        --line: #252825;
+        --text: #f5f6f3;
+        --muted: #8b9189;
+        --g: #8bea00;
+        --red: #ff6269;
+        --amber: #ffb64c;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, Arial, sans-serif;
+      }
+      body:before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.22;
+        background-image: radial-gradient(#fff 0.45px, transparent 0.45px);
+        background-size: 5px 5px;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      .mono {
+        font-family: "DM Mono", monospace;
+      }
+      .wrap {
+        width: min(1180px, calc(100% - 40px));
+        margin: auto;
+      }
+      .grid {
+        background-image:
+          linear-gradient(var(--line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--line) 1px, transparent 1px);
+        background-size: 72px 72px;
+      }
+      header {
+        height: 76px;
+        border-bottom: 1px solid var(--line);
+        background: #090a09dd;
+        backdrop-filter: blur(12px);
+        position: sticky;
+        top: 0;
+        z-index: 9;
+      }
+      .nav {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .brand b {
+        color: var(--g);
+      }
+      .mark {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+      .mark i {
+        width: 4px;
+        background: var(--g);
+        border-radius: 4px;
+      }
+      .mark i:nth-child(1) {
+        height: 9px;
+      }
+      .mark i:nth-child(2) {
+        height: 18px;
+      }
+      .mark i:nth-child(3) {
+        height: 28px;
+      }
+      .mark i:nth-child(4) {
+        height: 15px;
+      }
+      .mark i:nth-child(5) {
+        height: 23px;
+      }
+      .links {
+        display: flex;
+        gap: 30px;
+        font: 10px "DM Mono";
+        color: #858b83;
+      }
+      .links a:hover {
+        color: #fff;
+      }
+      .cta {
+        background: var(--g);
+        color: #080a08;
+        padding: 11px 17px;
+        font-size: 10px;
+        font-weight: 800;
+        border: 1px solid var(--g);
+      }
+      .hero {
+        text-align: center;
+        padding: 90px 0 60px;
+        position: relative;
+        overflow: hidden;
+      }
+      .tag {
+        display: inline-block;
+        border: 1px solid #343833;
+        padding: 8px 12px;
+        color: var(--g);
+        font: 10px "DM Mono";
+        letter-spacing: 1px;
+        background: #0b0d0b;
+      }
+      .hero h1 {
+        font-size: clamp(60px, 9vw, 112px);
+        line-height: 0.88;
+        letter-spacing: -6px;
+        margin: 30px auto 22px;
+        max-width: 1000px;
+      }
+      .hero h1 span,
+      h2 span {
+        color: var(--g);
+      }
+      .sub {
+        max-width: 690px;
+        margin: auto;
+        color: #9ca29a;
+        font-size: 15px;
+        line-height: 1.7;
+      }
+      .buttons {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin: 30px 0;
+      }
+      .btn {
+        padding: 13px 21px;
+        border: 1px solid #3a3e38;
+        background: transparent;
+        color: #eee;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .btn.green {
+        background: var(--g);
+        color: #090a09;
+        border-color: var(--g);
+      }
+      .stats {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 45px;
+      }
+      .stats span {
+        border: 1px solid #292d28;
+        padding: 8px 12px;
+        color: #747b72;
+        font: 9px "DM Mono";
+      }
+      .mock {
+        position: relative;
+        height: 380px;
+        margin: 55px auto 0;
+        width: min(1000px, 95%);
+      }
+      .dash {
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%) perspective(900px) rotateX(3deg);
+        width: 92%;
+        height: 330px;
+        background: #101210;
+        border: 1px solid #383d36;
+        box-shadow: 0 35px 100px #000;
+        overflow: hidden;
+        text-align: left;
+      }
+      .top {
+        height: 42px;
+        border-bottom: 1px solid #292d28;
+        padding: 0 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font: 9px "DM Mono";
+        color: #8a9087;
+      }
+      .top b {
+        color: var(--g);
+      }
+      .dots {
+        display: flex;
+        gap: 5px;
+      }
+      .dots i {
+        width: 5px;
+        height: 5px;
+        background: #444942;
+        border-radius: 50%;
+      }
+      .dashbody {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        height: calc(100% - 42px);
+      }
+      .side {
+        border-right: 1px solid #292d28;
+        padding: 13px 9px;
+      }
+      .side div {
+        padding: 9px;
+        color: #71786f;
+        font: 9px "DM Mono";
+        margin-bottom: 3px;
+      }
+      .side .on {
+        background: #192014;
+        color: var(--g);
+      }
+      .main {
+        padding: 16px;
+      }
+      .title {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 13px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .card {
+        border: 1px solid #2a2e29;
+        background: #0d0f0d;
+        padding: 12px;
+      }
+      .card small,
+      .label {
+        font: 8px "DM Mono";
+        color: #737970;
+      }
+      .card strong {
+        display: block;
+        font-size: 19px;
+        margin-top: 7px;
+      }
+      .green {
+        color: var(--g);
+      }
+      .lower {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .panel {
+        border: 1px solid #2a2e29;
+        padding: 12px;
+        height: 145px;
+      }
+      .bars {
+        height: 100px;
+        display: flex;
+        align-items: end;
+        gap: 6px;
+      }
+      .bars i {
+        flex: 1;
+        background: #424a3d;
+      }
+      .bars i:nth-child(2n) {
+        background: #667b4e;
+      }
+      .risk {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .donut {
+        width: 86px;
+        height: 86px;
+        border-radius: 50%;
+        background: conic-gradient(
+          var(--g) 0 72%,
+          #50544d 72% 90%,
+          #a97a3d 90% 97%,
+          #7d4046 97%
+        );
+        position: relative;
+      }
+      .donut:after {
+        content: "";
+        position: absolute;
+        inset: 19px;
+        background: #0d0f0d;
+        border-radius: 50%;
+      }
+      .risk p {
+        font: 8px "DM Mono";
+        color: #7c8279;
+        line-height: 2;
+      }
+      .float {
+        position: absolute;
+        background: #101210;
+        border: 1px solid #3a4037;
+        padding: 11px 14px;
+        box-shadow: 0 15px 50px #000;
+        font: 8px "DM Mono";
+        color: #7f857c;
+      }
+      .float b {
+        display: block;
+        font: 700 12px Inter;
+        margin-top: 4px;
+      }
+      .safe {
+        left: 0;
+        top: 90px;
+      }
+      .safe b {
+        color: var(--g);
+      }
+      .alert {
+        right: 0;
+        bottom: 38px;
+      }
+      .alert b {
+        color: var(--red);
+      }
+      section.block {
+        border-top: 1px solid var(--line);
+        padding: 105px 0;
+      }
+      .head {
+        display: grid;
+        grid-template-columns: 1fr 1.35fr;
+        gap: 60px;
+      }
+      .eyebrow {
+        font: 10px "DM Mono";
+        color: var(--g);
+        letter-spacing: 1px;
+      }
+      h2 {
+        font-size: clamp(42px, 5.5vw, 70px);
+        line-height: 0.95;
+        letter-spacing: -4px;
+        margin: 14px 0;
+      }
+      .lead {
+        color: #9aa098;
+        font-size: 15px;
+        line-height: 1.75;
+        margin: 0;
+      }
+      .three {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        background: var(--line);
+        margin-top: 60px;
+      }
+      .item {
+        background: var(--bg);
+        padding: 30px;
+        min-height: 190px;
+      }
+      .num {
+        font: 10px "DM Mono";
+        color: #5f665d;
+      }
+      .item h3 {
+        margin: 40px 0 8px;
+        font-size: 19px;
+      }
+      .item p,
+      .tech p {
+        margin: 0;
+        color: #747b72;
+        font-size: 11px;
+        line-height: 1.7;
+      }
+      .steps {
+        margin-top: 60px;
+        border-top: 1px solid var(--line);
+      }
+      .step {
+        display: grid;
+        grid-template-columns: 80px 1fr 1.4fr;
+        gap: 30px;
+        padding: 27px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .stepno {
+        color: var(--g);
+        font: 11px "DM Mono";
+      }
+      .step h3 {
+        margin: 0;
+        font-size: 22px;
+      }
+      .step p {
+        margin: 0;
+        color: #747b72;
+        font-size: 12px;
+        line-height: 1.7;
+      }
+      .demo {
+        margin-top: 55px;
+        border: 1px solid #343832;
+        background: #0d0f0d;
+      }
+      .demohead {
+        display: flex;
+        justify-content: space-between;
+        padding: 13px 16px;
+        border-bottom: 1px solid #292d28;
+        font: 9px "DM Mono";
+        color: #777e75;
+      }
+      .live {
+        color: var(--g);
+      }
+      .demobody {
+        padding: 25px;
+      }
+      .callgrid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 14px;
+      }
+      .callbox,
+      .analysis {
+        border: 1px solid #2a2e29;
+        padding: 24px;
+      }
+      .phone {
+        font-size: 25px;
+        font-weight: 700;
+        margin: 10px 0 5px;
+      }
+      .wave {
+        height: 55px;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+      }
+      .wave i {
+        width: 3px;
+        background: #596151;
+        border-radius: 3px;
+      }
+      .wave i:nth-child(3n) {
+        background: var(--g);
+      }
+      .scoreline {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+      }
+      .score {
+        font-size: 62px;
+        letter-spacing: -4px;
+      }
+      .score small {
+        font: 14px "DM Mono";
+        color: #727970;
+        letter-spacing: 0;
+      }
+      .bar {
+        height: 5px;
+        background: #292d27;
+        margin: 17px 0;
+      }
+      .bar i {
+        display: block;
+        width: 92%;
+        height: 100%;
+        background: var(--g);
+      }
+      .flags {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+      }
+      .flag {
+        padding: 6px 8px;
+        border: 1px solid #4a3928;
+        color: var(--amber);
+        font: 8px "DM Mono";
+      }
+      .four {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        background: var(--line);
+        margin-top: 60px;
+      }
+      .tech {
+        background: var(--bg);
+        padding: 28px;
+        min-height: 180px;
+      }
+      .tech .icon {
+        font-size: 22px;
+        color: var(--g);
+      }
+      .tech h3 {
+        font-size: 16px;
+        margin: 28px 0 8px;
+      }
+      .final {
+        text-align: center;
+        border-top: 1px solid var(--line);
+        padding: 120px 0;
+      }
+      .final h2 {
+        font-size: clamp(48px, 7vw, 88px);
+        max-width: 900px;
+        margin: 15px auto 25px;
+      }
+      .final p {
+        margin: auto;
+      }
+      .footer {
+        border-top: 1px solid var(--line);
+        padding: 24px 0;
+        font: 9px "DM Mono";
+        color: #646b63;
+      }
+      .foot {
+        display: flex;
+        justify-content: space-between;
+      }
+      @media (max-width: 800px) {
+        .links {
+          display: none;
+        }
+        .wrap {
+          width: calc(100% - 28px);
+        }
+        .hero {
+          padding-top: 65px;
+        }
+        .hero h1 {
+          letter-spacing: -3px;
+        }
+        .dash {
+          width: 108%;
+          height: 275px;
+        }
+        .side {
+          display: none;
+        }
+        .dashbody {
+          display: block;
+        }
+        .mock {
+          height: 315px;
+        }
+        .head,
+        .callgrid {
+          grid-template-columns: 1fr;
+        }
+        .three,
+        .four {
+          grid-template-columns: 1fr;
+        }
+        .step {
+          grid-template-columns: 50px 1fr;
+          gap: 12px;
+        }
+        .step p {
+          grid-column: 2;
+        }
+        .lower {
+          grid-template-columns: 1fr;
+        }
+        .float {
+          display: none;
+        }
+        .footer .foot {
+          gap: 15px;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap nav">
+        <a class="brand" href="#"
+          ><span class="mark"><i></i><i></i><i></i><i></i><i></i></span
+          >Snitch<b>AI</b></a
+        >
+        <nav class="links">
+          <a href="#problem">THE PROBLEM</a><a href="#how">HOW IT WORKS</a
+          ><a href="#demo">PROTOTYPE</a><a href="#tech">TECHNOLOGY</a>
+        </nav>
+        <a class="cta" href="#demo">VIEW PROTOTYPE ↗</a>
+      </div>
+    </header>
+    <main>
+      <section class="hero grid">
+        <div class="wrap">
+          <span class="tag">AI-POWERED VOICE FRAUD DETECTION</span>
+          <h1>Hear the threat.<br /><span>Stop the fraud.</span></h1>
+          <p class="sub">
+            Snitch AI analyzes voice calls in real time to identify
+            suspicious patterns, calculate risk, and warn people before a scam
+            becomes a loss.
+          </p>
+          <div class="buttons">
+            <a class="btn green" href="#demo">EXPLORE THE PROTOTYPE ↗</a
+            ><a class="btn" href="#how">HOW IT WORKS ↓</a>
+          </div>
+          <div class="stats">
+            <span>REAL-TIME ANALYSIS</span><span>VOICE INTELLIGENCE</span
+            ><span>0–100 RISK SCORE</span><span>PRIVACY FIRST</span>
+          </div>
+          <div class="mock">
+            <div class="dash">
+              <div class="top">
+                <span>Snitch AI <b>AI</b> / OVERVIEW</span
+                ><span class="dots"><i></i><i></i><i></i></span>
+              </div>
+              <div class="dashbody">
+                <aside class="side">
+                  <div class="on">OVERVIEW</div>
+                  <div>LIVE ANALYSIS</div>
+                  <div>CALL HISTORY</div>
+                  <div>ALERTS</div>
+                </aside>
+                <div class="main">
+                  <div class="title">Fraud Detection Overview</div>
+                  <div class="cards">
+                    <div class="card">
+                      <small>CALLS MONITORED</small><strong>24,892</strong>
+                    </div>
+                    <div class="card">
+                      <small>FRAUD DETECTED</small
+                      ><strong class="green">342</strong>
+                    </div>
+                    <div class="card">
+                      <small>ACCURACY RATE</small><strong>99.2%</strong>
+                    </div>
+                  </div>
+                  <div class="lower">
+                    <div class="panel">
+                      <div class="label">DETECTION ACTIVITY / 24H</div>
+                      <div class="bars">
+                        <i style="height: 35%"></i><i style="height: 55%"></i
+                        ><i style="height: 42%"></i><i style="height: 72%"></i
+                        ><i style="height: 48%"></i><i style="height: 83%"></i
+                        ><i style="height: 61%"></i><i style="height: 91%"></i
+                        ><i style="height: 66%"></i><i style="height: 78%"></i>
+                      </div>
+                    </div>
+                    <div class="panel">
+                      <div class="label">RISK DISTRIBUTION</div>
+                      <div class="risk">
+                        <div class="donut"></div>
+                        <p>
+                          LOW 72%<br />MEDIUM 18%<br />HIGH 7%<br />FRAUD 3%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="float safe">DETECTION STATUS<b>● SAFE CALL</b></div>
+            <div class="float alert">LIVE ALERT<b>▲ FRAUD RISK 92/100</b></div>
+          </div>
+        </div>
+      </section>
+      <section class="block" id="problem">
+        <div class="wrap">
+          <div class="head">
+            <div>
+              <span class="eyebrow">01 / THE PROBLEM</span>
+              <h2>Scams sound<br />like people.</h2>
+            </div>
+            <p class="lead">
+              Modern voice scams don't always look suspicious. They sound like a
+              bank employee, a delivery agent, a government official - and they
+              create urgency before the victim has time to think.
+            </p>
+          </div>
+          <div class="three">
+            <article class="item">
+              <span class="num">01</span>
+              <h3>Trust is exploited</h3>
+              <p>
+                Attackers imitate familiar institutions and use convincing
+                conversations to make fraudulent requests feel legitimate.
+              </p>
+            </article>
+            <article class="item">
+              <span class="num">02</span>
+              <h3>Pressure wins</h3>
+              <p>
+                Urgency, fear and social engineering push people toward
+                decisions they would normally question.
+              </p>
+            </article>
+            <article class="item">
+              <span class="num">03</span>
+              <h3>Detection comes late</h3>
+              <p>
+                Most protection happens after a payment, message or report.
+                Snitch AI moves detection into the conversation itself.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="block" id="how">
+        <div class="wrap">
+          <div class="head">
+            <div>
+              <span class="eyebrow">02 / HOW IT WORKS</span>
+              <h2>From voice<br />to warning.</h2>
+            </div>
+            <p class="lead">
+              Snitch AI turns a live conversation into an interpretable risk
+              signal - combining voice characteristics and suspicious
+              conversational patterns into one clear score.
+            </p>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <span class="stepno">01</span>
+              <h3>Capture</h3>
+              <p>
+                Analyze the incoming call stream without interrupting the
+                conversation.
+              </p>
+            </div>
+            <div class="step">
+              <span class="stepno">02</span>
+              <h3>Understand</h3>
+              <p>
+                Extract spectral, prosodic and speaker-level signals from the
+                voice.
+              </p>
+            </div>
+            <div class="step">
+              <span class="stepno">03</span>
+              <h3>Score</h3>
+              <p>
+                Combine detected signals into a simple 0–100 fraud-risk score.
+              </p>
+            </div>
+            <div class="step">
+              <span class="stepno">04</span>
+              <h3>Protect</h3>
+              <p>
+                Surface an alert when the conversation crosses a suspicious-risk
+                threshold.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="block" id="demo">
+        <div class="wrap">
+          <div class="head">
+            <div>
+              <span class="eyebrow">03 / INTERACTIVE CONCEPT</span>
+              <h2>See the<br />signal.</h2>
+            </div>
+            <p class="lead">
+              A visual representation of the Snitch AI prototype: a call comes
+              in, the system analyzes it, and the risk becomes understandable at
+              a glance.
+            </p>
+          </div>
+          <div class="demo">
+            <div class="demohead">
+              <span
+                ><span class="live">● LIVE</span> / PROTOTYPE SIMULATION</span
+              ><span>Snitch AI ENGINE / 320ms</span>
+            </div>
+            <div class="demobody">
+              <div class="callgrid">
+                <div class="callbox">
+                  <span class="label">INCOMING CALL</span>
+                  <div class="phone">+91 98765 43210</div>
+                  <span class="label">VOICE STREAM ACTIVE</span>
+                  <div class="wave" id="wave"></div>
+                </div>
+                <div class="analysis">
+                  <span class="label">AI RISK ANALYSIS</span>
+                  <div class="scoreline">
+                    <div>
+                      <span class="label">RISK SCORE</span>
+                      <div class="score">92<small>/100</small></div>
+                    </div>
+                    <strong
+                      style="color: var(--red); font: 10px &quot;DM Mono&quot;"
+                      >HIGH RISK</strong
+                    >
+                  </div>
+                  <div class="bar"><i></i></div>
+                  <div class="flags">
+                    <span class="flag">URGENT REQUEST</span
+                    ><span class="flag">SUSPICIOUS PATTERN</span
+                    ><span class="flag">VOICE ANOMALY</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="block" id="tech">
+        <div class="wrap">
+          <div class="head">
+            <div>
+              <span class="eyebrow">04 / TECHNOLOGY</span>
+              <h2>Signals that<br />matter.</h2>
+            </div>
+            <p class="lead">
+              The concept combines multiple layers of voice intelligence so a
+              single unusual characteristic does not have to determine the
+              result.
+            </p>
+          </div>
+          <div class="four">
+            <article class="tech">
+              <div class="icon">◌</div>
+              <h3>Spectral Analysis</h3>
+              <p>
+                Study frequency characteristics of speech to identify unusual
+                voice patterns.
+              </p>
+            </article>
+            <article class="tech">
+              <div class="icon">∿</div>
+              <h3>Prosody</h3>
+              <p>
+                Analyze rhythm, pitch, pauses and speaking dynamics associated
+                with suspicious behavior.
+              </p>
+            </article>
+            <article class="tech">
+              <div class="icon">◎</div>
+              <h3>Speaker Signals</h3>
+              <p>
+                Use speaker-level characteristics as an additional layer of
+                voice intelligence.
+              </p>
+            </article>
+            <article class="tech">
+              <div class="icon">◇</div>
+              <h3>Risk Engine</h3>
+              <p>
+                Combine signals into a transparent score that can trigger an
+                actionable warning.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="final">
+        <div class="wrap">
+          <span class="tag">BUILT FOR A SAFER DIGITAL WORLD</span>
+          <h2>Don't wait for the<br /><span>payment to fail.</span></h2>
+          <p class="sub">
+            Detect suspicious voice interactions before they become financial
+            loss.
+          </p>
+          <div class="buttons">
+            <a class="btn green" href="#demo">EXPLORE Snitch AI ↗</a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer">
+      <div class="wrap foot">
+        <span>© 2026 Snitch AI / PROTOTYPE</span
+        ><span>SMART INDIA HACKATHON · CONCEPT SHOWCASE</span>
+      </div>
+    </footer>
+    <script>
+      const w = document.getElementById("wave");
+      for (let i = 0; i < 64; i++) {
+        let x = document.createElement("i");
+        x.style.height = 8 + Math.random() * 42 + "px";
+        w.appendChild(x);
+      }
+      setInterval(
+        () =>
+          [...w.children].forEach(
+            (x) => (x.style.height = 8 + Math.random() * 42 + "px"),
+          ),
+        650,
+      );
+    </script>
+  </body>
+</html>
